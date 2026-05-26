@@ -1,5 +1,6 @@
 #include "../include/Cinematograf.h"
 #include "../include/Exceptii.h"
+#include "RezervareOnline.h"
 #include <iostream>
 #include <string>
 #include <limits>
@@ -13,8 +14,9 @@ void afiseazaMeniu() {
     cout << "2. sali        - afiseaza salile" << endl;
     cout << "3. locuri      - afiseaza locurile dintr-o sala" << endl;
     cout << "4. rezerva     - realizeaza o rezervare" << endl;
-    cout << "5. listeaza    - afiseaza rezervarile facute" << endl;
-    cout << "6. ajutor      - reafiseaza meniul" << endl;
+    cout << "5. online      - rezervare online (cu email)" << endl;
+    cout << "6. listeaza    - afiseaza rezervarile facute" << endl;
+    cout << "7. ajutor      - reafiseaza meniul" << endl;
     cout << "0. iesire      - inchide aplicatia" << endl;
     cout << "===================================" << endl;
 }
@@ -109,10 +111,44 @@ int main() {
                 cout << e.what() << endl;
             }
         }
-        else if (comanda == "5" || comanda == "listeaza") {
+        else if (comanda == "5" || comanda == "online") {
+            try {
+                string nume = citesteLinie("Nume client: ");
+                string email = citesteLinie("Email client: ");
+                int numarSala = citesteIntreg("Numarul salii: ");
+                int rand = citesteIntreg("Randul (1, 2, 3...): ");
+                int coloana = citesteIntreg("Coloana (1, 2, 3...): ");
+
+                // Verificam manual ca locul nu e ocupat (cu exceptii)
+                Sala* sala = cinema.gasesteSala(numarSala);
+                if (sala == nullptr) {
+                    throw IndexInvalidException("Sala " + to_string(numarSala) + " nu exista!");
+                }
+                if (rand - 1 < 0 || rand - 1 >= sala->getRanduri() ||
+                    coloana - 1 < 0 || coloana - 1 >= sala->getColoane()) {
+                    throw IndexInvalidException("Loc in afara salii!");
+                }
+                if (sala->esteOcupat(rand - 1, coloana - 1)) {
+                    throw LocOcupatException(rand - 1, coloana - 1);
+                }
+
+                // Marcam locul si cream rezervarea online
+                sala->ocupaLoc(rand - 1, coloana - 1);
+                RezervareOnline* ro = new RezervareOnline(nume, email,
+                    sala->getFilm(), sala, rand - 1, coloana - 1);
+                cinema.adaugaRezervare(ro);
+                cout << "Rezervare online realizata cu succes!" << endl;
+            } catch (const LocOcupatException& e) {
+                cout << e.what() << endl;
+            } catch (const IndexInvalidException& e) {
+                cout << e.what() << endl;
+            }
+        }
+
+        else if (comanda == "6" || comanda == "listeaza") {
             cinema.afiseazaRezervari();
         }
-        else if (comanda == "6" || comanda == "ajutor" || comanda == "help") {
+        else if (comanda == "7" || comanda == "ajutor" || comanda == "help") {
             afiseazaMeniu();
         }
         else if (comanda.empty()) {

@@ -39,6 +39,12 @@ void Cinematograf::adaugaSala(Sala* sala) {
     sali.push_back(sala);
 }
 
+//Adauga rezervare
+void Cinematograf::adaugaRezervare(Rezervare* rez) {
+    rezervari.push_back(rez);
+}
+
+
 // Afiseaza toate filmele
 void Cinematograf::afiseazaFilme() const {
     std::cout << "\n=== Filme disponibile la " << nume << " ===" << std::endl;

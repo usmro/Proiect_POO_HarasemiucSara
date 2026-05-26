@@ -1,15 +1,15 @@
-
 #ifndef CINEMATOGRAF_H
 #define CINEMATOGRAF_H
 
+#include "ICinemaService.h"
 #include "Film.h"
 #include "Sala.h"
 #include "Rezervare.h"
 #include <vector>
 #include <string>
 
-// Clasa Cinematograf - agrega Sali, Filme si Rezervari
-class Cinematograf {
+// Cinematograf - implementeaza interfata ICinemaService (polimorfism!)
+class Cinematograf : public ICinemaService {
 private:
     std::string nume;
     std::vector<Film*> filme;
@@ -27,16 +27,17 @@ public:
     // Adaugare obiecte in cinematograf
     void adaugaFilm(Film* film);
     void adaugaSala(Sala* sala);
+    void adaugaRezervare(Rezervare* rez);  // pentru RezervareOnline
 
-    // Afisari
-    void afiseazaFilme() const;
-    void afiseazaSali() const;
-    void afiseazaLocuri(int numarSala) const;
-    void afiseazaRezervari() const;
-
-    // Realizeaza o rezervare - poate arunca exceptii!
+    // Metode din interfata ICinemaService (override = suprascriere)
+    void afiseazaFilme() const override;
+    void afiseazaLocuri(int numarSala) const override;
     void realizeazaRezervare(std::string numeClient, int numarSala,
-                             int rand, int coloana);
+                             int rand, int coloana) override;
+
+    // Metode proprii (in plus fata de interfata)
+    void afiseazaSali() const;
+    void afiseazaRezervari() const;
 
     // Cautare
     Sala* gasesteSala(int numarSala) const;
