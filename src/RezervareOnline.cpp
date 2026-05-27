@@ -1,4 +1,4 @@
-
+#include "Culori.h"
 #include "RezervareOnline.h"
 #include <iostream>
 
@@ -18,15 +18,17 @@ void RezervareOnline::setEmailClient(std::string email) {
     this->emailClient = email;
 }
 
-// Suprascriem metoda afiseaza() - adaugam emailul
 void RezervareOnline::afiseaza() const {
-    std::cout << "[ONLINE] Rezervare pentru: " << numeClient
-              << " (email: " << emailClient << ")";
+    using namespace Culori;
+    std::cout << MAGENTA << "[ONLINE] " << RESET
+              << BOLD << numeClient << RESET
+              << " (" << CYAN << emailClient << RESET << ")";
     if (film != nullptr) {
-        std::cout << " | Film: " << film->getTitlu();
+        std::cout << " | " << CYAN_D << film->getTitlu() << RESET;
     }
     if (sala != nullptr) {
-        std::cout << " | Sala: " << sala->getNumar();
+        std::cout << " | Sala " << sala->getNumar();
     }
-    std::cout << " | Loc: R" << rand + 1 << "C" << coloana + 1 << std::endl;
+    std::cout << " | Loc: " << GALBEN << "R" << rand + 1
+              << "C" << coloana + 1 << RESET << std::endl;
 }

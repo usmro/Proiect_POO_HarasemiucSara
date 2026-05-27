@@ -1,29 +1,94 @@
-#include "../include/Cinematograf.h"
-#include "../include/Exceptii.h"
+#include "Cinematograf.h"
+#include "Exceptii.h"
 #include "RezervareOnline.h"
+#include "Culori.h"
 #include <iostream>
 #include <string>
 #include <limits>
 
-using namespace std;
+// Pentru activarea ANSI in Windows
+// Pentru activarea ANSI in Windows
+#ifdef _WIN32
+#include <windows.h>
+// Macro-ul lipseste in versiuni vechi de MinGW
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#endif
+#endif
 
-// Functii helper pentru meniu
-void afiseazaMeniu() {
-    cout << "\n========== MENIU CINEMA ==========" << endl;
-    cout << "1. filme       - afiseaza filmele disponibile" << endl;
-    cout << "2. sali        - afiseaza salile" << endl;
-    cout << "3. locuri      - afiseaza locurile dintr-o sala" << endl;
-    cout << "4. rezerva     - realizeaza o rezervare" << endl;
-    cout << "5. online      - rezervare online (cu email)" << endl;
-    cout << "6. listeaza    - afiseaza rezervarile facute" << endl;
-    cout << "7. ajutor      - reafiseaza meniul" << endl;
-    cout << "0. iesire      - inchide aplicatia" << endl;
-    cout << "===================================" << endl;
+using namespace std;
+using namespace Culori;
+
+// Activeaza suportul pentru culori ANSI in Windows
+void activeazaCulori() {
+#ifdef _WIN32
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD dwMode = 0;
+    GetConsoleMode(hOut, &dwMode);
+    SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    // Setam si encoding-ul pentru caractere speciale
+    SetConsoleOutputCP(65001);  // UTF-8
+#endif
 }
 
-// Citeste o linie intreaga (pentru nume cu spatii)
+// Banner de pornire cu ASCII art mare
+void afiseazaBanner() {
+    using namespace Culori;
+    cout << "\n";
+    cout << CYAN_D << BOLD;
+    cout << "   ######  ##  ##   ##  #####  ##   ##    ###    \n";
+    cout << "  ##       ##  ###  ## ##      ### ###   ## ##   \n";
+    cout << "  ##       ##  ## # ## ####    #######  ##   ##  \n";
+    cout << "  ##       ##  ##  ### ##      ## # ##  #######  \n";
+    cout << "   ######  ##  ##   ## #####   ##   ## ##     ## \n";
+    cout << RESET;
+    cout << GALBEN << BOLD;
+    cout << "          ~ Sistem de Rezervari Bilete ~          \n";
+    cout << RESET << endl;
+}
+
+// Meniu colorat
+void afiseazaMeniu() {
+    cout << "\n" << GALBEN << BOLD;
+    cout << "  +----------------- MENIU ------------------+\n" << RESET;
+    cout << GALBEN << "  | " << RESET << CYAN_D << "1" << RESET << " - " << "filme       "
+         << " - afiseaza filmele disponibile" << GALBEN << "  |" << RESET << "\n";
+    cout << GALBEN << "  | " << RESET << CYAN_D << "2" << RESET << " - " << "sali        "
+         << " - afiseaza salile               " << GALBEN << "  |" << RESET << "\n";
+    cout << GALBEN << "  | " << RESET << CYAN_D << "3" << RESET << " - " << "locuri      "
+         << " - schema unei sali              " << GALBEN << "  |" << RESET << "\n";
+    cout << GALBEN << "  | " << RESET << CYAN_D << "4" << RESET << " - " << "rezerva     "
+         << " - rezervare la casa             " << GALBEN << "  |" << RESET << "\n";
+    cout << GALBEN << "  | " << RESET << CYAN_D << "5" << RESET << " - " << "online      "
+         << " - rezervare online (cu email)   " << GALBEN << "  |" << RESET << "\n";
+    cout << GALBEN << "  | " << RESET << CYAN_D << "6" << RESET << " - " << "listeaza    "
+         << " - afiseaza rezervarile          " << GALBEN << "  |" << RESET << "\n";
+    cout << GALBEN << "  | " << RESET << CYAN_D << "7" << RESET << " - " << "ajutor      "
+         << " - reafiseaza meniul             " << GALBEN << "  |" << RESET << "\n";
+    cout << GALBEN << "  | " << RESET << ROSU_D << "0" << RESET << " - " << "iesire      "
+         << " - inchide aplicatia             " << GALBEN << "  |" << RESET << "\n";
+    cout << GALBEN << BOLD;
+    cout << "  +------------------------------------------+\n" << RESET;
+}
+
+// Mesaj de succes (verde)
+void afiseazaSucces(const string& mesaj) {
+    cout << VERDE_D << BOLD << "[OK] " << RESET << VERDE << mesaj << RESET << endl;
+}
+
+// Mesaj de eroare (rosu)
+void afiseazaEroare(const string& mesaj) {
+    cout << ROSU_D << BOLD << "[EROARE] " << RESET << ROSU << mesaj << RESET << endl;
+}
+
+// Prompt pentru input
+void afiseazaPrompt(const string& text) {
+    cout << CYAN << "  > " << RESET << text;
+}
+
+// Citeste o linie intreaga
 string citesteLinie(const string& prompt) {
-    cout << prompt;
+    afiseazaPrompt(prompt);
     string linie;
     getline(cin, linie);
     return linie;
@@ -31,20 +96,20 @@ string citesteLinie(const string& prompt) {
 
 // Citeste un numar intreg (cu validare)
 int citesteIntreg(const string& prompt) {
-    cout << prompt;
+    afiseazaPrompt(prompt);
     int n;
     while (!(cin >> n)) {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Valoare invalida. Reincearca: ";
+        afiseazaEroare("Valoare invalida. Reincearca:");
+        afiseazaPrompt(prompt);
     }
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');  // scapam de \n
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     return n;
 }
 
-// Initializeaza cinematograful cu date de test (filme, sali)
+// Initializeaza cinematograful cu date de test
 void initializeazaDate(Cinematograf& cinema) {
-    // Adaugam filme
     Film* f1 = new Film("Interstellar", "SF", 169, "2D");
     Film* f2 = new Film("Avatar 3", "Aventura", 192, "3D");
     Film* f3 = new Film("Dune", "SF", 155, "2D");
@@ -52,7 +117,6 @@ void initializeazaDate(Cinematograf& cinema) {
     cinema.adaugaFilm(f2);
     cinema.adaugaFilm(f3);
 
-    // Adaugam sali si le asociem filme
     Sala* s1 = new Sala(1, 5, 8);
     s1->setFilm(f1);
     Sala* s2 = new Sala(2, 6, 10);
@@ -65,22 +129,22 @@ void initializeazaDate(Cinematograf& cinema) {
 }
 
 int main() {
-    cout << "*** Bine ai venit la Cinema USM! ***" << endl;
+    activeazaCulori();  // Activam suportul ANSI pe Windows
+    afiseazaBanner();
 
-    // Cream cinematograful si il populam
-    Cinematograf cinema("Cinema USM");
+    Cinematograf cinema("Cinema");
     initializeazaDate(cinema);
 
     afiseazaMeniu();
 
-    // Bucla principala a aplicatiei (CLI)
     string comanda;
     while (true) {
-        cout << "\n> ";
+        cout << "\n" << GALBEN_D << "cinema> " << RESET;
         getline(cin, comanda);
 
         if (comanda == "0" || comanda == "iesire" || comanda == "exit") {
-            cout << "La revedere!" << endl;
+            cout << CYAN_D << BOLD << "\nLa revedere! Multumim ca ati folosit Cinema!\n"
+                 << RESET << endl;
             break;
         }
         else if (comanda == "1" || comanda == "filme") {
@@ -94,7 +158,7 @@ int main() {
                 int numarSala = citesteIntreg("Numarul salii: ");
                 cinema.afiseazaLocuri(numarSala);
             } catch (const IndexInvalidException& e) {
-                cout << e.what() << endl;
+                afiseazaEroare(e.what());
             }
         }
         else if (comanda == "4" || comanda == "rezerva") {
@@ -103,12 +167,12 @@ int main() {
                 int numarSala = citesteIntreg("Numarul salii: ");
                 int rand = citesteIntreg("Randul (1, 2, 3...): ");
                 int coloana = citesteIntreg("Coloana (1, 2, 3...): ");
-                // Convertim la indici 0-based intern
                 cinema.realizeazaRezervare(nume, numarSala, rand - 1, coloana - 1);
+                afiseazaSucces("Rezervare realizata cu succes pentru " + nume + "!");
             } catch (const LocOcupatException& e) {
-                cout << e.what() << endl;
+                afiseazaEroare(e.what());
             } catch (const IndexInvalidException& e) {
-                cout << e.what() << endl;
+                afiseazaEroare(e.what());
             }
         }
         else if (comanda == "5" || comanda == "online") {
@@ -119,7 +183,6 @@ int main() {
                 int rand = citesteIntreg("Randul (1, 2, 3...): ");
                 int coloana = citesteIntreg("Coloana (1, 2, 3...): ");
 
-                // Verificam manual ca locul nu e ocupat (cu exceptii)
                 Sala* sala = cinema.gasesteSala(numarSala);
                 if (sala == nullptr) {
                     throw IndexInvalidException("Sala " + to_string(numarSala) + " nu exista!");
@@ -132,19 +195,17 @@ int main() {
                     throw LocOcupatException(rand - 1, coloana - 1);
                 }
 
-                // Marcam locul si cream rezervarea online
                 sala->ocupaLoc(rand - 1, coloana - 1);
                 RezervareOnline* ro = new RezervareOnline(nume, email,
                     sala->getFilm(), sala, rand - 1, coloana - 1);
                 cinema.adaugaRezervare(ro);
-                cout << "Rezervare online realizata cu succes!" << endl;
+                afiseazaSucces("Rezervare online realizata cu succes! (confirmare la " + email + ")");
             } catch (const LocOcupatException& e) {
-                cout << e.what() << endl;
+                afiseazaEroare(e.what());
             } catch (const IndexInvalidException& e) {
-                cout << e.what() << endl;
+                afiseazaEroare(e.what());
             }
         }
-
         else if (comanda == "6" || comanda == "listeaza") {
             cinema.afiseazaRezervari();
         }
@@ -152,10 +213,10 @@ int main() {
             afiseazaMeniu();
         }
         else if (comanda.empty()) {
-            // Nu fac nimic la Enter gol
+            // ignora Enter gol
         }
         else {
-            cout << "Comanda necunoscuta. Scrie 'ajutor' pentru lista de comenzi." << endl;
+            afiseazaEroare("Comanda necunoscuta. Scrie 'ajutor' pentru lista de comenzi.");
         }
     }
 

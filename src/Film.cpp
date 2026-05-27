@@ -1,4 +1,6 @@
 #include "Film.h"
+#include "Culori.h"
+
 #include <iostream>
 
 // Constructor implicit
@@ -29,10 +31,12 @@ void Film::setGen(std::string gen) { this->gen = gen; }
 void Film::setDurata(int durata) { this->durata = durata; }
 void Film::setTip(std::string tip) { this->tip = tip; }
 
-// Afiseaza informatiile filmului
+// Afiseaza informatiile filmului - colorat
 void Film::afiseaza() const {
-    std::cout << "Film: " << titlu
-              << " | Gen: " << gen
+    using namespace Culori;
+    std::cout << CYAN_D << "[Film]" << RESET << " "
+              << BOLD << titlu << RESET
+              << " | Gen: " << GALBEN << gen << RESET
               << " | Durata: " << durata << " min"
-              << " | Tip: " << tip << std::endl;
+              << " | Tip: " << MAGENTA << tip << RESET << std::endl;
 }
