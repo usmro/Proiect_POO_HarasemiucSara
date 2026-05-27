@@ -141,3 +141,32 @@ Metode pure virtuale:
 - [ ] **Etapa IV**: Adaugare RezervareOnline, interfata ICinemaService
 - [ ] **Etapa V**: Teste unitare, Makefile, documentare finala
 - [ ] **Etapa VI**: Predare proiect
+
+
+
+## 7. Posibile imbunatatiri
+
+Proiectul ar putea fi extins in viitor cu urmatoarele functionalitati:
+
+- **Persistenta datelor** - salvare/incarcare filme, sali si rezervari din
+  fisier (text sau binar), ca sa nu se piarda dupa inchidere
+- **Calcul automat al pretului biletului** in functie de:
+  - Tipul filmului (2D / 3D - cu suplimentar)
+  - Ziua saptamanii (reducere lunea, weekend cu suplimentar)
+  - Categoria de clienti (student, senior, copil)
+- **Interfata grafica** (cu o biblioteca precum Qt sau SFML) in loc de CLI
+- **Anularea unei rezervari** (eliberare loc + stergere rezervare)
+- **Filtrare filme** dupa gen, tip sau durata
+- **Programari multiple ale aceluiasi film** in mai multe sali si la mai multe ore
+- **Sistem de cautare** dupa numele clientului in lista de rezervari
+- **Validare email** la rezervarea online (verificare ca are format corect)
+- **Templating C++** - clasa generica `Container<T>` pentru lista de obiecte
+
+## 8. Concluzii
+
+Proiectul aplica conceptele fundamentale ale Programarii Orientate pe Obiecte:
+incapsulare, mostenire, polimorfism, clase abstracte si gestiunea exceptiilor.
+Structura modulara (header + sursa separate, foldere pentru include/src/tests)
+permite extinderea usoara cu noi functionalitati. Folosirea STL (vector, string)
+reduce complexitatea codului. Testele unitare valideaza logica de baza si
+comportamentul exceptiilor.
