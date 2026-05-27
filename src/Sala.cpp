@@ -1,4 +1,6 @@
 #include "../include/Sala.h"
+#include "Culori.h"
+
 #include <iostream>
 
 // Constructor implicit - sala goala
@@ -45,29 +47,42 @@ void Sala::elibereazaLoc(int rand, int coloana) {
     locuri[rand][coloana] = false;
 }
 
-// Afiseaza schema salii cu locuri libere/ocupate
 void Sala::afiseazaLocuri() const {
-    std::cout << "\n=== Sala " << numar << " ===" << std::endl;
-    if (film != nullptr) {
-        std::cout << "Ruleaza: " << film->getTitlu() << std::endl;
-    }
-    std::cout << "[ ] = liber  [X] = ocupat\n" << std::endl;
+    using namespace Culori;
 
-    // Afisam coloanele (numere)
+    // Antet sala
+    std::cout << "\n" << CYAN_D << BOLD;
+    std::cout << "+---------------------------------+\n";
+    std::cout << "|         Sala " << numar << "                  |\n";
+    std::cout << "+---------------------------------+" << RESET << std::endl;
+
+    if (film != nullptr) {
+        std::cout << GALBEN << "Ruleaza: " << BOLD << film->getTitlu()
+                  << RESET << " (" << MAGENTA << film->getTip() << RESET << ")" << std::endl;
+    }
+
+    std::cout << VERDE << "[ ]" << RESET << " = liber  "
+              << ROSU << "[X]" << RESET << " = ocupat\n" << std::endl;
+
+    // Capul de tabel cu numere de coloane
     std::cout << "    ";
     for (int j = 0; j < coloane; j++) {
-        std::cout << " " << j + 1 << " ";
+        std::cout << CYAN << " " << j + 1 << " " << RESET;
+    }
+    std::cout << "\n    ";
+    for (int j = 0; j < coloane; j++) {
+        std::cout << "---";
     }
     std::cout << std::endl;
 
-    // Afisam fiecare rand
+    // Randurile cu locuri
     for (int i = 0; i < randuri; i++) {
-        std::cout << "R" << i + 1 << ": ";
+        std::cout << CYAN << "R" << i + 1 << ": " << RESET;
         for (int j = 0; j < coloane; j++) {
             if (locuri[i][j]) {
-                std::cout << "[X]";
+                std::cout << ROSU << "[X]" << RESET;
             } else {
-                std::cout << "[ ]";
+                std::cout << VERDE << "[ ]" << RESET;
             }
         }
         std::cout << std::endl;

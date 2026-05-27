@@ -1,4 +1,6 @@
 #include "../include/Rezervare.h"
+#include "Culori.h"
+
 #include <iostream>
 
 // Constructor implicit
@@ -30,14 +32,16 @@ Sala* Rezervare::getSala() const { return sala; }
 int Rezervare::getRand() const { return rand; }
 int Rezervare::getColoana() const { return coloana; }
 
-// Afiseaza detaliile rezervarii
 void Rezervare::afiseaza() const {
-    std::cout << "Rezervare pentru: " << numeClient;
+    using namespace Culori;
+    std::cout << VERDE_D << "[CASA] " << RESET
+              << BOLD << numeClient << RESET;
     if (film != nullptr) {
-        std::cout << " | Film: " << film->getTitlu();
+        std::cout << " | " << CYAN_D << film->getTitlu() << RESET;
     }
     if (sala != nullptr) {
-        std::cout << " | Sala: " << sala->getNumar();
+        std::cout << " | Sala " << sala->getNumar();
     }
-    std::cout << " | Loc: R" << rand + 1 << "C" << coloana + 1 << std::endl;
+    std::cout << " | Loc: " << GALBEN << "R" << rand + 1
+              << "C" << coloana + 1 << RESET << std::endl;
 }
